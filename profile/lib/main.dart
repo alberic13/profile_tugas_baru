@@ -40,6 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String _bio = "Passionate about creating beautiful apps.";
   File? _profileImage;
   bool _isEditing = false;
+  bool _isFollowing = false;
+  int _followerCount = 1; // Initial follower count
   List<String> _skills = ['Flutter', 'Dart', 'Firebase', 'UI/UX', 'API Integration'];
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
@@ -87,6 +89,13 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  void _toggleFollow() {
+    setState(() {
+      _isFollowing = !_isFollowing;
+      _followerCount += _isFollowing ? 1 : -1;
+    });
+  }
+
   void _addSkill() {
     if (_skillController.text.isNotEmpty) {
       setState(() {
@@ -100,6 +109,16 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _skills.remove(skill);
     });
+  }
+
+  String _formatFollowerCount() {
+    if (_followerCount >= 1000000) {
+      return '${(_followerCount / 1000000).toStringAsFixed(1)}M';
+    }
+    if (_followerCount >= 1000) {
+      return '${(_followerCount / 1000).toStringAsFixed(1)}K';
+    }
+    return _followerCount.toString();
   }
 
   @override
@@ -202,7 +221,40 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontSize: 16, 
                           color: Colors.white70),
                     ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${_formatFollowerCount()} followers',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  if (!_isEditing)
+                    ElevatedButton(
+                      onPressed: _toggleFollow,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isFollowing 
+                            ? Colors.grey[600] 
+                            : const Color.fromRGBO(3, 73, 129, 0.9),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      ),
+                      child: Text(
+                        _isFollowing ? 'Following' : 'Follow',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -265,7 +317,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   borderSide: BorderSide(color: Colors.white)),
                               ),
                             ),
-                            ),
+                          ),
                           IconButton(
                             icon: const Icon(Icons.add, color: Colors.white),
                             onPressed: _addSkill,
